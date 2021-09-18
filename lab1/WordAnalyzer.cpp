@@ -1,23 +1,15 @@
 
 #include "WordAnalyzer.h"
-#include <ctype.h>
+#include <cctype>
 #include <iostream>
 
 
 
 WordAnalyzer::WordAnalyzer() {
-	list = {};
 	map = {};
 	amountOfWords = 0;
 }
 
-/*
-WordAnalyzer::~WordAnalyzer() {
-	while (!list.empty()) {
-		WordData data = list.front();
-		delete *data;
-	}
-*/
 
 void WordAnalyzer::findWords(std::string line) {
 	std::string word = "";
@@ -40,30 +32,29 @@ void WordAnalyzer::findWords(std::string line) {
 void WordAnalyzer::readWordsFrom(std::string inputFile) {
 	std::ifstream file;
 	file.open(inputFile, std::ios::in);
-	
+
 	while (!file.eof()) {
 		std::string line;
 		std::getline(file, line);
 		findWords(line);
-	}		
+	}
 	file.close();
 }
 
 
-	
-struct Comparator
-{
+
+struct Comparator {
 	bool operator ()(WordData &first, WordData &second) {
-	
+
 		return (first.getCount() > second.getCount());
-	
+
 	}
 };
 
-void WordAnalyzer::analyze() {
+void WordAnalyzer::analyze(std::list<WordData> &list) {
 	for (auto it = map.cbegin(); it != map.cend(); it++) {
-		WordData* data = new WordData(it->first, it->second, ((double)it->second * 100 / amountOfWords));
-		list.push_back(*data);
+        WordData wordData(it->first, it->second, ((double)it->second * 100 / amountOfWords));
+		list.push_back(wordData);
 	}
 	list.sort(Comparator());
 }
@@ -71,8 +62,10 @@ void WordAnalyzer::analyze() {
 
 
 void WordAnalyzer::writePreparedDataTo(std::string outputFile) {
+    std::list<WordData> list = {};
 	std::ofstream file;
 	file.open(outputFile, std::ios::out);
+	analyze(list);
 	for (auto it = list.begin(); it != list.end(); it++) {
 		file << it->getWord() << "," << it->getCount() << "," << it->getFrequency() << "\n";
 	}
