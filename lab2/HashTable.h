@@ -81,34 +81,9 @@ private:
 
 };
 
-bool operator==(const HashTable& a, const HashTable& b) {
-    if (a.bufferSize != b.bufferSize && a.amountOfElements != b.amountOfElements) {
-        return false;
-    }
+bool operator==(const HashTable& a, const HashTable& b);
 
-    for (int i = 0; i < a.bufferSize; i++) {
-        ListOfTable listA = a.table[i];
-        ListOfTable listB = b.table[i];
-        if (listA->size() == listB->size()) {
-            for (auto itA = listA->begin(); itA != listA->end(); itA++) {
-                for (auto itB = listB->begin(); itB != listB->end(); itB++) {
-                    Value valueA = (**itA);
-                    Value valueB = (**itB);
-                    if (valueA.age != valueB.age || valueA.weight != valueB.weight || valueA.key != valueB.key) {
-                        return false;
-                    }
-                }
-            }
-        } else {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool operator!=(const HashTable& a, const HashTable& b) {
-    return (a == b);
-}
+bool operator!=(const HashTable& a, const HashTable& b);
 
 
 #endif //HASHTABLE_HASHTABLE_H

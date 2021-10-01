@@ -5,6 +5,7 @@
 
 #include "HashTable.h"
 #include <cmath>
+#include <iostream>
 
 HashTable::HashTable() {
     table = new ListOfTable[bufferSize];
@@ -42,27 +43,64 @@ HashTable::HashTable(HashTable &&old) {
 Value& HashTable::operator[](const Key &k) {
     try {
         return this->at(k);
+
     } catch (const std::invalid_argument& e) {
         Value* value = new Value(0,0,k);
         this->insert(k, *value);
         return *value;
     }
+
+
 }
 
 HashTable& HashTable::operator=(const HashTable &old) {
     HashTable hashTable(old);
     swap(hashTable);
+
     return *this;
 }
 
 HashTable& HashTable::operator=(HashTable &&old) {
-    HashTable* pHashTable = new HashTable(old);
-    swap(*pHashTable);
+    HashTable hashTable(old);
+    swap(hashTable);
+    old.table = nullptr;
+    old.bufferSize = 0;
+
     return *this;
 }
 
 
+bool operator==(const HashTable& a, const HashTable& b) {
+    if (a.bufferSize != b.bufferSize && a.amountOfElements != b.amountOfElements) {
+        return false;
+    }
+
+    for (int i = 0; i < a.bufferSize; i++) {
+        ListOfTable listA = a.table[i];
+        ListOfTable listB = b.table[i];
+        if (listA->size() == listB->size()) {
+            for (auto itA = listA->begin(); itA != listA->end(); itA++) {
+                for (auto itB = listB->begin(); itB != listB->end(); itB++) {
+                    Value valueA = (**itA);
+                    Value valueB = (**itB);
+                    if (valueA.age != valueB.age || valueA.weight != valueB.weight || valueA.key != valueB.key) {
+                        return false;
+                    }
+                }
+            }
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool operator!=(const HashTable& a, const HashTable& b) {
+    return !(a == b);
+}
+
 bool HashTable::insert(const Key &key, const Value &value) {
+    if (contains(key)) {return false;}
     double newFactor = amountOfElements / (double)bufferSize;
     if (newFactor > loadFactor) {
         resize();
@@ -148,7 +186,7 @@ size_t HashTable::size() const {
 
 void HashTable::resize() {
     size_t newBufferSize = bufferSize*2;
-    Table newTable = new ListOfTable[bufferSize];
+    Table newTable = new ListOfTable[newBufferSize];
     for (int i = 0; i < newBufferSize; i++) {
         newTable[i] = new std::list<const Value*>;
     }
@@ -158,9 +196,12 @@ void HashTable::resize() {
             Value value = (**it);
             int hash = calculate_hash(value.key,newBufferSize);
             newTable[hash]->push_back(new Value(value.age,value.weight,value.key));
+            delete (*it);
         }
+        delete table[i];
     }
-    freeMemory();
+
+    delete []table;
     table = newTable;
     bufferSize = newBufferSize;
 
@@ -169,8 +210,8 @@ void HashTable::resize() {
 void HashTable::freeMemory() {
     if (table == nullptr) {return;}
     for (int i = 0; i < bufferSize; i++) {
-        for (auto & it : *table[i]) {
-            delete it;
+        for (auto it = table[i]->begin(); it != table[i]->end(); it++) {
+            delete (*it);
         }
         delete table[i];
     }
