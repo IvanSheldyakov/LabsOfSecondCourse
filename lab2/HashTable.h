@@ -25,8 +25,8 @@ struct Student {
 
 
 typedef Student Value;
-typedef std::list<const Value*>** Table;
-typedef std::list<const Value*>* ListOfTable;
+typedef std::list<Value>** Table;
+typedef std::list<Value>* ListOfTable;
 
 class HashTable {
 
