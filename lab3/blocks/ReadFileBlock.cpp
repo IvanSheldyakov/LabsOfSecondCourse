@@ -5,28 +5,21 @@
 #include <stdexcept>
 #include <fstream>
 #include "ReadFileBlock.h"
-#include "UtilityClass.h"
+#include "BlockMaker.h"
 
-
-void ReadFileBlock::takeArguments(const std::list<std::string> &params) {
-    if (params.size() != 1) {throw IncorrectAmountOfParams("readfileblock needs only one param, given "
-    + std::to_string(params.size()));}
-    filename = params.back();
-    if (!UtilityClass::isExist(filename)) {throw FileDoesNotExistException("file " +  filename + " doesnt exist");}
-}
+static BlockMaker<ReadFileBlock> maker("readfile");
 
 std::list<std::string>& ReadFileBlock::execute(const std::list<std::string> &params,std::list<std::string> &text) {
-    try {
-        takeArguments(params);
-    } catch(FileDoesNotExistException& exception) {
-        throw exception;
-    } catch(IncorrectAmountOfParams& exception) {
-        throw exception;
-    }
+    if (params.size() != 1) {throw IncorrectAmountOfParams("readfileblock needs only one param, given "
+    + std::to_string(params.size()));}
+    std::string filename = params.back();
 
     std::ifstream file;
-    file.open(filename, std::ios::in);
-
+    try{
+        file.open(filename, std::ios::in);
+    } catch (std::exception& exception) {
+        throw CantOpenFileException("cant open file, named " + filename);
+    }
 
     while (!file.eof()) {
         std::string line;

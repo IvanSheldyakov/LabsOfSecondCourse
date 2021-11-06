@@ -5,17 +5,13 @@
 #include <stdexcept>
 #include "SortBlock.h"
 
-void SortBlock::takeArguments(const std::list<std::string> &params) {
-    if (!params.empty()) {
-        throw IncorrectAmountOfParams("sortblock doesnt need params, given " + std::to_string(params.size()));
-    }
-}
+#include "BlockMaker.h"
+
+static BlockMaker<SortBlock> maker("sort");
 
 std::list<std::string>& SortBlock::execute(const std::list<std::string> &params, std::list<std::string>& text) {
-    try {
-        takeArguments(params);
-    } catch (IncorrectAmountOfParams& exception) {
-        throw exception;
+    if (!params.empty()) {
+        throw IncorrectAmountOfParams("sortblock doesnt need params, given " + std::to_string(params.size()));
     }
 
     text.sort();

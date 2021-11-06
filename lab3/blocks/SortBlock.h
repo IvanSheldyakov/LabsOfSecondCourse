@@ -8,18 +8,19 @@
 #include "Worker.h"
 
 class SortBlock : public Worker{
-    std::string blockName;
+
 public:
-    SortBlock(const std::string& name) : blockName(name){}
+    SortBlock() = default;
     std::list<std::string>& execute(const std::list<std::string>& params, std::list<std::string>& text) override;
-    InOutValuesForBlock& getType(InOutValuesForBlock& values) override {
-        values.setIn("text");
-        values.setOut("text");
-        return values;
+    InOutTypesForBlock& getInType(InOutTypesForBlock& inType) override {
+        inType = InOutTypesForBlock::TEXT;
+        return inType;
+    }
+    InOutTypesForBlock& getOutType(InOutTypesForBlock& outType) override {
+        outType = InOutTypesForBlock::TEXT;
+        return outType;
     }
 
-private:
-    void takeArguments(const std::list<std::string>& params);
 };
 
 #endif //WORKFLOW_SORTBLOCK_H

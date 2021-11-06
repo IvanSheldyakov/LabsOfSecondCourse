@@ -11,18 +11,15 @@
 
 class WorkFlowParser {
 
-    std::map<int, BlockArguments> BunchOfBlocksArgs;
+    std::map<int, BlockArguments> bunchOfBlocksArgs;
     std::list<int> scheme;
 public:
     void readWorkFlowFile(std::string file);
 
     const std::map<int, BlockArguments> &getBunchOfBlocksArgs() const;
 
-    void setBunchOfBlocksArgs(const std::map<int, BlockArguments> &blocks);
-
     const std::list<int> &getScheme() const;
 
-    void setScheme(const std::list<int> &scheme);
 
 private:
     void parseBlockString(std::string& line);

@@ -9,13 +9,21 @@
 #include <list>
 #include "IncorrectAmountOfParams.h"
 #include "FileDoesNotExistException.h"
-#include "InOutValuesForBlock.h"
+#include "UnavailableWorkFlowException.h"
+#include "CantOpenFileException.h"
+
+
+enum class InOutTypesForBlock{
+    NO,
+    TEXT
+};
 
 
 class Worker{
 public:
     virtual std::list<std::string>& execute(const std::list<std::string>& params, std::list<std::string>& text) = 0;
-    virtual InOutValuesForBlock& getType(InOutValuesForBlock& values) = 0;
+    virtual InOutTypesForBlock& getOutType(InOutTypesForBlock& outType) = 0;
+    virtual InOutTypesForBlock& getInType(InOutTypesForBlock& inType) = 0;
     virtual ~Worker() = default;
 };
 

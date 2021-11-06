@@ -8,20 +8,19 @@
 #include "Worker.h"
 
 class DumpBlock : public Worker {
-    std::string blockName;
-    std::string filename;
+
 
 public:
-    DumpBlock(const std::string& name) : blockName(name){}
+    DumpBlock() = default;
     std::list<std::string>& execute(const std::list<std::string>& params, std::list<std::string>& text) override;
-    InOutValuesForBlock& getType(InOutValuesForBlock& values) override {
-        values.setIn("text");
-        values.setOut("text");
-        return values;
+    InOutTypesForBlock& getInType(InOutTypesForBlock& inType) override {
+        inType = InOutTypesForBlock::TEXT;
+        return inType;
     }
-
-private:
-    void takeArguments(const std::list<std::string>& params);
+    InOutTypesForBlock& getOutType(InOutTypesForBlock& outType) override {
+        outType = InOutTypesForBlock::TEXT;
+        return outType;
+    }
 };
 
 #endif //WORKFLOW_DUMPBLOCK_H

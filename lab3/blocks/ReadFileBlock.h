@@ -8,19 +8,19 @@
 #include "Worker.h"
 
 class ReadFileBlock : public Worker{
-    std::string blockName;
-    std::string filename;
+
 public:
-    ReadFileBlock(const std::string& _blockName) : blockName(_blockName) {}
+    ReadFileBlock() = default;
     std::list<std::string>& execute(const std::list<std::string>& params, std::list<std::string>& text) override;
-    InOutValuesForBlock& getType(InOutValuesForBlock& values) override {
-        values.setIn("no");
-        values.setOut("text");
-        return values;
+    InOutTypesForBlock& getInType(InOutTypesForBlock& inType) override {
+        inType = InOutTypesForBlock::NO;
+        return inType;
+    }
+    InOutTypesForBlock& getOutType(InOutTypesForBlock& outType) override {
+        outType = InOutTypesForBlock::TEXT;
+        return outType;
     }
 
-private:
-    void takeArguments(const std::list<std::string>& params);
 };
 
 

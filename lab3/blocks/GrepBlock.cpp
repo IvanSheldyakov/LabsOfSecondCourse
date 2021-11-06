@@ -5,20 +5,15 @@
 #include <stdexcept>
 #include "GrepBlock.h"
 
+#include "BlockMaker.h"
 
-void GrepBlock::takeArguments(const std::list<std::string> &params) {
-    if (params.size() != 1) {throw IncorrectAmountOfParams("grepblock needs only one param, given "
-    + std::to_string(params.size()));}
-    word = params.front();
-}
+static BlockMaker<GrepBlock> maker("grep");
 
 std::list<std::string>& GrepBlock::execute(const std::list<std::string> &params, std::list<std::string>& text) {
-    try {
-        takeArguments(params);
-    } catch (IncorrectAmountOfParams& exception) {
-        throw exception;
-    }
-    takeArguments(params);
+    if (params.size() != 1) {throw IncorrectAmountOfParams("grepblock needs only one param, given "
+                                                           + std::to_string(params.size()));}
+    std::string word = params.front();
+
     std::list<std::string> newText;
     for (auto it = text.begin(); it != text.end(); ++it) {
         std::string str = *it;

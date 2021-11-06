@@ -5,30 +5,20 @@
 #include <stdexcept>
 #include <fstream>
 #include "WriteFileBlock.h"
-#include "UtilityClass.h"
+#include "BlockMaker.h"
 
-
-void WriteFileBlock::takeArguments(const std::list<std::string> &params) {
-    if (params.size() != 1) {throw IncorrectAmountOfParams("writeblock needs only one param given "
-    + std::to_string(params.size()));}
-    filename = params.back();
-    if (!UtilityClass::isExist(filename)) {
-        throw FileDoesNotExistException("file " + filename + "doesnt exist");
-    }
-}
-
+static BlockMaker<WriteFileBlock> maker("writefile");
 
 std::list<std::string>& WriteFileBlock::execute(const std::list<std::string> &params, std::list<std::string>& text) {
-    try {
-        takeArguments(params);
-    } catch(FileDoesNotExistException& exception) {
-        throw exception;
-    } catch(IncorrectAmountOfParams& exception) {
-        throw exception;
-    }
-
+    if (params.size() != 1) {throw IncorrectAmountOfParams("writeblock needs only one param given "
+                                                           + std::to_string(params.size()));}
+    std::string filename = params.back();
     std::ofstream file;
-    file.open(filename, std::ios::out);
+    try {
+        file.open(filename, std::ios::out);
+    } catch (std::exception& exception) {
+        throw FileDoesNotExistException("file " + filename + "doesnt exist");
+    }
 
     for (auto it = text.begin(); it != text.end(); ++it) {
         file << *it << std::endl;
