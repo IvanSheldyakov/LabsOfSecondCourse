@@ -7,11 +7,12 @@
 
 #include <string>
 #include "Viewer.h"
+#include "Subscriber.h"
 
 class ConsoleViewer : public Viewer {
 public:
-    void println(const std::string& output) override;
-    void print(const std::string& output) override;
+    void show(const std::string& output) override;
+    void update(GameModel *model) override;
 };
 
 

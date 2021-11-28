@@ -8,22 +8,22 @@
 #include <memory>
 #include "GuessCreator.h"
 #include "Controller.h"
-#include "Viewer.h"
+#include "GameModel.h"
 
-class HumanCreator : public GuessCreator{
+class HumanCreator : public GuessCreator {
     std::shared_ptr<Controller> controller;
-    std::shared_ptr<Viewer> viewer;
+    GameModel* model;
 public:
-    HumanCreator(std::shared_ptr<Controller>& controller, std::shared_ptr<Viewer>& viewer) {
+    HumanCreator(std::shared_ptr<Controller>& controller) {
         this->controller = controller;
-        this->viewer = viewer;
     }
-    std::string create(const GameFeatures& features) override;
-    BullsCows gradeGuess(const std::string& guess) override;
+    std::string create() override;
+    void gradeGuess(const std::string& guess) override;
+    void update(GameModel* model) override;
 
 private:
-    void gradeBulls(BullsCows& bullsCows);
-    void gradeCows(BullsCows& bullsCows);
+    int gradeBulls();
+    int gradeCows();
 };
 
 

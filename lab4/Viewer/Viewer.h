@@ -5,10 +5,11 @@
 #ifndef BULLSANDCOWS_VIEWER_H
 #define BULLSANDCOWS_VIEWER_H
 
-class Viewer{
+#include "Subscriber.h"
+
+class Viewer : public Subscriber{
 public:
-    virtual void println(const std::string& output) = 0;
-    virtual void print(const std::string& output) = 0;
+    virtual void show(const std::string& output) = 0;
     virtual ~Viewer() = default;
 };
 

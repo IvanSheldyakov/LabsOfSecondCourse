@@ -9,12 +9,15 @@
 #include <map>
 #include "GuessingPlayer.h"
 #include "Constants.h"
+#include "GameModel.h"
 
 
 class GuessingBot : public GuessingPlayer {
     std::map<std::string, int> allGuesses;
+    GameModel* model;
 public:
-    std::string makeGuess(const GameFeatures& features) override;
+    std::string makeGuess() override;
+    void update(GameModel* model) override;
 
 private:
     int findFreeSymbol(int *allowedSymbols, int amountOfPossibleSymbols);

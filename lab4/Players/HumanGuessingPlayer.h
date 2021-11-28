@@ -10,15 +10,20 @@
 #include "GuessingPlayer.h"
 #include "Viewer.h"
 #include "Controller.h"
+#include "GameModel.h"
+
 
 class HumanGuessingPlayer : public GuessingPlayer {
     std::shared_ptr<Controller> controller;
+    GameModel* model;
 
 public:
     HumanGuessingPlayer(std::shared_ptr<Controller>& controller) {
         this->controller = controller;
     }
-    std::string makeGuess(const GameFeatures& features) override;
+    void update(GameModel *model) override;
+    std::string makeGuess() override;
+
 };
 
 

@@ -7,8 +7,7 @@
 int main() {
 
 
-    Game game(new ConsoleController, new ConsoleViewer);
-    //std::cout << bot.tryToGuess(a) << std::endl;
-    game.gameLoop();
+    Game game(new ConsoleViewer, new ConsoleController);
+    game.gameloop();
     return 0;
 }

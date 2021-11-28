@@ -6,10 +6,11 @@
 #define BULLSANDCOWS_GUESSINGPLAYER_H
 
 #include "GameFeatures.h"
+#include "Subscriber.h"
 
-class GuessingPlayer {
+class GuessingPlayer : public Subscriber {
 public:
-    virtual std::string makeGuess(const GameFeatures& features) = 0;
+    virtual std::string makeGuess() = 0;
     virtual ~GuessingPlayer() = default;
 };
 

@@ -4,11 +4,18 @@
 
 #include <iostream>
 #include "ConsoleViewer.h"
+#include "GameModel.h"
 
-void ConsoleViewer::println(const std::string &output) {
-    std::cout << output << std::endl;
+
+void ConsoleViewer::show(const std::string &output) {
+    std::cout << output;
 }
 
-void ConsoleViewer::print(const std::string &output) {
-    std::cout << output;
+void ConsoleViewer::update(GameModel *model) {
+    std::shared_ptr<GameStateForViewer> state = model->getGameStateForViewer();
+    std::list<std::string> data = state->getWhatToShow();
+    if (data.empty()) {return;}
+    for(auto it = data.begin(); it != data.end(); ++it) {
+        show(*it);
+    }
 }

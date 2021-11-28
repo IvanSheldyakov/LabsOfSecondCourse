@@ -9,18 +9,21 @@
 #include "Controller.h"
 #include "Viewer.h"
 #include "Constants.h"
+#include "GameModel.h"
 
-class BotCreator : public GuessCreator{
+class BotCreator : public GuessCreator {
     std::string createdGuess;
+    GameModel* model;
 
 public:
-    std::string create(const GameFeatures& features) override;
-    BullsCows gradeGuess(const std::string& guess) override;
+    std::string create() override;
+    void gradeGuess(const std::string& guess) override;
+    void update(GameModel* model) override;
 
 private:
     int findFreeSymbol(int* allowedSymbols, int amountOfPossibleSymbols);
-    bool checkAndCountBulls(const std::string& guess, BullsCows& bullsCows, int idxOfSupposedBull);
-    void countCows(const std::string& guess, BullsCows& bullsCows, int idxOfSupposedCow);
+    bool checkAndCountBulls(const std::string& guess, int* bulls, int idxOfSupposedBull);
+    void countCows(const std::string& guess, int* cows, int idxOfSupposedCow);
 };
 
 

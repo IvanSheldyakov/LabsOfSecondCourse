@@ -3,6 +3,8 @@
 //
 
 #include "HumanCreator.h"
+#include "ChangingBullsAndCowsState.h"
+#include "ShowState.h"
 
 namespace {
     bool isNumber(const std::string& input) {
@@ -15,39 +17,50 @@ namespace {
     }
 }
 
-std::string HumanCreator::create(const GameFeatures &features) {
+std::string HumanCreator::create() {
     return controller->getInput();
 }
 
-BullsCows HumanCreator::gradeGuess(const std::string &guess) {
-    BullsCows bullsCows;
-    gradeBulls(bullsCows);
-    gradeCows(bullsCows);
-    return bullsCows;
+void HumanCreator::gradeGuess(const std::string &guess) {
+    std::shared_ptr<GameState> state(new ChangingBullsAndCowsState);
+    state->setBulls(gradeBulls());
+    state->setCows(gradeCows());
+    model->updateGameState(state);
+
 }
 
-void HumanCreator::gradeBulls(BullsCows &bullsCows) {
-    viewer->println("Enter how many bulls in guess:");
+int HumanCreator::gradeBulls() {
+    std::shared_ptr<GameStateForViewer> state(new ShowState);
+    state->addDataToShow("Enter how many bulls in guess:");
+    model->updateGameState(state);
     while(true) {
         std::string countBulls = controller->getInput();
         if (isNumber(countBulls)) {
-            bullsCows.bulls = std::stoi(countBulls);
-            break;
+            return std::stoi(countBulls);
         } else {
-            viewer->println("It should be number, try again:");
+            state->clearData();
+            state->addDataToShow("It should be number, try again:");
+            model->updateGameState(state);
         }
     }
 }
 
-void HumanCreator::gradeCows(BullsCows &bullsCows) {
-    viewer->println("Enter how many cows in guess:");
+int HumanCreator::gradeCows() {
+    std::shared_ptr<GameStateForViewer> state(new ShowState);
+    state->addDataToShow("Enter how many cows in guess:");
+    model->updateGameState(state);
     while(true) {
         std::string countCows = controller->getInput();
         if (isNumber(countCows)) {
-            bullsCows.cows= std::stoi(countCows);
-            break;
+            return std::stoi(countCows);
         } else {
-            viewer->println("It should be number, try again:");
+            state->clearData();
+            state->addDataToShow("It should be number, try again:");
+            model->updateGameState(state);
         }
     }
+}
+
+void HumanCreator::update(GameModel *model) {
+    this->model = model;
 }

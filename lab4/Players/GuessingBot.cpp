@@ -5,7 +5,8 @@
 #include <ctime>
 #include "GuessingBot.h"
 
-std::string GuessingBot::makeGuess(const GameFeatures &features) {
+std::string GuessingBot::makeGuess() {
+    GameFeatures features = model->getGameFeatures();
     int len = features.lenOfSequence;
     while(true) {
         int allowedSymbols[ASCII_CODE_OF_SMALL_Z+1] = {0};
@@ -40,4 +41,8 @@ int GuessingBot::findFreeSymbol(int *allowedSymbols, int amountOfPossibleSymbols
             return randomNumber;
         }
     }
+}
+
+void GuessingBot::update(GameModel *model) {
+    this->model = model;
 }

@@ -4,8 +4,13 @@
 
 #include "HumanGuessingPlayer.h"
 
-std::string HumanGuessingPlayer::makeGuess(const GameFeatures &features) {
+
+std::string HumanGuessingPlayer::makeGuess() {
     return controller->getInput();
+}
+
+void HumanGuessingPlayer::update(GameModel *model) {
+    this->model = model;
 }
 
 
