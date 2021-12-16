@@ -13,9 +13,15 @@ int main() {
 
     try {
         CSVparser<std::string,std::string,int> parse(file,0,',','\n','\"');
-        for(auto & it : parse) {
-            std::cout << it;
+        for(auto it = parse.begin(); it != parse.end(); ++it) {
+            std::cout << *it;
         }
+
+        for(auto it = parse.begin(); it != parse.end(); ++it) {
+            std::cout << *it;
+        }
+
+
     }catch (std::exception& exp) {
         std::cout << exp.what();
     }

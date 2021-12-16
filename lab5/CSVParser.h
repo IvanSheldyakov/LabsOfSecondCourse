@@ -13,13 +13,13 @@
 #include <sstream>
 #include "EmptyStringException.h"
 #include "UnknownTypeException.h"
-#include "TupleOutOfRangeException.h"
+#include "LineOutOfRangeException.h"
 
 
 
 template<typename... Types>
 class CSVparser{
-    std::vector<std::tuple<Types...>> data;
+
     std::ifstream& in;
     std::string line;
     int lastLineIdx;
@@ -29,88 +29,20 @@ class CSVparser{
     char rowSeparator;
     char shieldingSymbol;
     bool meetShieldingSymbol;
+    long beginningOfFile;
 public:
+
 
     CSVparser(std::ifstream& _in, int countOfSkips, char _columnSeparator, char _rowSeparator, char _shieldingSymbol)
     : in(_in), columnSeparator(_columnSeparator), rowSeparator(_rowSeparator), shieldingSymbol(_shieldingSymbol) {
 
-        skipLines(countOfSkips);
-        while(!in.eof()) {
-            std::tuple<Types...> cells;
-            try {
-                parseCell<0>(cells);
-            } catch(TupleOutOfRangeException& exp) {
-                data.push_back(cells);
-                row++;
-                column = 0;
-            }
-        }
-    }
 
+
+        skipLines(countOfSkips);
+        beginningOfFile = in.tellg();
+    }
 
 private:
-    template<size_t N>
-    typename std::enable_if<(N < sizeof...(Types))>::type parseCell(std::tuple<Types...>& cells) {
-        std::string cell;
-        try{
-            cell = readCell();
-        } catch (std::exception& ex) {
-            return;
-        }
-        pushValue<N>(cells,cell);
-        column++;
-        parseCell<N+1>(cells);
-
-    }
-
-    template<size_t n>
-    [[noreturn]] typename std::enable_if<(n >= sizeof...(Types))>::type parseCell(std::tuple<Types...>& cells){
-        throw TupleOutOfRangeException("tuple out of range");
-    }
-
-    template<size_t N>
-    void pushValue(std::tuple<Types...>& cells, const std::string& str) {
-        try {
-            std::istringstream stream(str);
-            stream.exceptions(std::istringstream::failbit);
-            stream >> std::get<N>(cells);
-        }catch (std::istringstream::failure &ex){
-            throw UnknownTypeException("column: " + std::to_string(column)
-            + ", row: " + std::to_string(row) + " - UnknownType");
-        }
-    }
-
-    std::string readCell() {
-        if (line.empty()) {
-            std::getline(in, line, rowSeparator);
-            lastLineIdx = 0;
-            if (line.empty()) {throw EmptyStringException("line is empty");}
-        }
-        std::string cell;
-        meetShieldingSymbol = false;
-        for (int i = lastLineIdx; i <= line.size(); i++) {
-            if (i == line.size()) {
-                line = "";
-                return cell;
-            } else if (line[i] == columnSeparator) {
-                if (meetShieldingSymbol) {
-                    cell.push_back(line[i]);
-                } else {
-                    lastLineIdx = i + 1;
-                    return cell;
-                }
-            } else if (line[i] == shieldingSymbol && meetShieldingSymbol) {
-                meetShieldingSymbol = false;
-
-            } else if (line[i] == shieldingSymbol && !meetShieldingSymbol) {
-                meetShieldingSymbol = true;
-
-            } else {
-                cell.push_back(line[i]);
-            }
-        }
-    }
-
     void skipLines(int amountOfLines) {
         for (int i = 0; i < amountOfLines; i++) {
             std::string _line;
@@ -123,36 +55,130 @@ private:
     class Iterator {
         typedef typename std::tuple<Types...> value;
 
+
     public:
-        Iterator(typename std::vector<std::tuple<Types...>>::iterator it) : it(it){};
+        Iterator(CSVparser<Types...>* _parser, long _pos ) : parser(_parser), pos(_pos){
+            if (_pos == -1) {
+                return;
+            }
+            if (parser->beginningOfFile == 0) {
+                parser->in.clear();
+                parser->in.seekg(parser->beginningOfFile, std::ios::beg);
+            } else {
+                parser->in.clear();
+                parser->in.seekg(parser->beginningOfFile-1, std::ios::beg);
+            }
+            try {
+                parseCell<0>(tuple);
+            } catch(LineOutOfRangeException& exp) {
+                parser->row++;
+                parser->column = 0;
+            }
+            pos = parser->in.tellg();
+
+        };
 
         bool operator!=(Iterator const& other) const {
-            return it != other.it;
+            return pos != other.pos;
         }
         bool operator==(Iterator const& other) const {
-            return it == other.it;
+            return pos == other.pos;
         }
-        value& operator*() const {
-            return *it;
+        value& operator*()  {
+            return tuple;
         }
 
         Iterator& operator++() {
-            ++it;
+            pos = parser->in.tellg();
+            try {
+                parseCell<0>(tuple);
+            } catch(LineOutOfRangeException& exp) {
+                parser->row++;
+                parser->column = 0;
+            }
             return *this;
         }
 
     private:
-        typename std::vector<std::tuple<Types...>>::iterator it;
+        CSVparser<Types...>* parser;
+        value tuple;
+        long pos;
+
+    private:
+        template<size_t N>
+        typename std::enable_if<(N < sizeof...(Types))>::type parseCell(std::tuple<Types...>& cells) {
+            std::string cell;
+            try{
+                cell = readCell();
+            } catch (std::exception& ex) {
+                return;
+            }
+            pushValue<N>(cells,cell);
+            parser->column++;
+            parseCell<N+1>(cells);
+
+        }
+
+        template<size_t n>
+        [[noreturn]] typename std::enable_if<(n >= sizeof...(Types))>::type parseCell(std::tuple<Types...>& cells){
+            throw LineOutOfRangeException("column: " + std::to_string(parser->column) +
+            ", row: " + std::to_string(parser->row) + " - line out of range");
+        }
+
+        template<size_t N>
+        void pushValue(std::tuple<Types...>& cells, const std::string& str) {
+            try {
+                std::istringstream stream(str);
+                stream.exceptions(std::istringstream::failbit);
+                stream >> std::get<N>(cells);
+            }catch (std::istringstream::failure &ex){
+                throw UnknownTypeException("column: " + std::to_string(parser->column)
+                                           + ", row: " + std::to_string(parser->row) + " - UnknownType");
+            }
+        }
+
+        std::string readCell() {
+            if (parser->line.empty()) {
+                std::getline(parser->in, parser->line, parser->rowSeparator);
+                parser->lastLineIdx = 0;
+                if (parser->line.empty()) {throw EmptyStringException("line is empty");}
+            }
+            std::string cell;
+            parser->meetShieldingSymbol = false;
+            for (int i = parser->lastLineIdx; i <= parser->line.size(); i++) {
+                if (i == parser->line.size()) {
+                    parser->line = "";
+                    return cell;
+                } else if (parser->line[i] == parser->columnSeparator) {
+                    if (parser->meetShieldingSymbol) {
+                        cell.push_back(parser->line[i]);
+                    } else {
+                        parser->lastLineIdx = i + 1;
+                        return cell;
+                    }
+                } else if (parser->line[i] == parser->shieldingSymbol && parser->meetShieldingSymbol) {
+                    parser->meetShieldingSymbol = false;
+
+                } else if (parser->line[i] == parser->shieldingSymbol && ! parser->meetShieldingSymbol) {
+                    parser->meetShieldingSymbol = true;
+
+                } else {
+                    cell.push_back(parser->line[i]);
+                }
+            }
+        }
     };
 
 public:
     Iterator begin() {
-        return Iterator(data.begin());
+        return Iterator(this,0);
     }
 
     Iterator end() {
-        return Iterator(data.end());
+        return Iterator(this,-1);
     }
+
+    friend class Iterator;
 };
 
 template<class charT, class trT, class T>
